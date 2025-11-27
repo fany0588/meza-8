@@ -1,0 +1,137 @@
+{% extends 'tienda/base.html' %}
+
+{% block title %}Gestión de Pedidos{% endblock %}
+
+{% block content %}
+<div class="gestion-container">
+    <div class="gestion-header">
+        <h1>Gestión de Pedidos</h1>
+        <div class="filters">
+            <select id="filterEstado" class="filter-input">
+                <option value="">Todos los estados</option>
+                <option value="pendiente">Pendiente</option>
+                <option value="confirmado">Confirmado</option>
+                <option value="en_proceso">En Proceso</option>
+                <option value="enviado">Enviado</option>
+                <option value="entregado">Entregado</option>
+                <option value="cancelado">Cancelado</option>
+            </select>
+        </div>
+    </div>
+    
+    <table class="gestion-table">
+        <thead>
+            <tr>
+                <th>ID Pedido</th>
+                <th>Cliente</th>
+                <th>Fecha</th>
+                <th>Total</th>
+                <th>Método Pago</th>
+                <th>Estado</th>
+                <th>Código Seguimiento</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for pedido in pedidos %}
+            <tr data-estado="{{ pedido.estado }}">
+                <td>#{{ pedido.id }}</td>
+                <td>{{ pedido.cliente.get_full_name }}</td>
+                <td>{{ pedido.fecha_pedido|date:"d/m/Y H:i" }}</td>
+                <td>${{ pedido.total }}</td>
+                <td>{{ pedido.get_metodo_pago_display }}</td>
+                <td>
+                    <span class="status-badge status-{{ pedido.estado }}">
+                        {{ pedido.get_estado_display }}
+                    </span>
+                </td>
+                <td>{{ pedido.codigo_seguimiento|default:"-" }}</td>
+                <td class="actions">
+                    <a href="#" class="btn btn-sm btn-outline">Ver</a>
+                    <a href="#" class="btn btn-sm btn-outline">Editar</a>
+                    <select class="status-select" data-pedido="{{ pedido.id }}">
+                        <option value="pendiente" {% if pedido.estado == 'pendiente' %}selected{% endif %}>Pendiente</option>
+                        <option value="confirmado" {% if pedido.estado == 'confirmado' %}selected{% endif %}>Confirmado</option>
+                        <option value="en_proceso" {% if pedido.estado == 'en_proceso' %}selected{% endif %}>En Proceso</option>
+                        <option value="enviado" {% if pedido.estado == 'enviado' %}selected{% endif %}>Enviado</option>
+                        <option value="entregado" {% if pedido.estado == 'entregado' %}selected{% endif %}>Entregado</option>
+                        <option value="cancelado" {% if pedido.estado == 'cancelado' %}selected{% endif %}>Cancelado</option>
+                    </select>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="8" class="no-data">No hay pedidos registrados</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<style>
+.status-badge {
+    padding: 0.25rem 0.5rem;
+    border-radius: 15px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.status-pendiente { background-color: #fff3cd; color: #856404; }
+.status-confirmado { background-color: #d1ecf1; color: #0c5460; }
+.status-en_proceso { background-color: #d4edda; color: #155724; }
+.status-enviado { background-color: #cce7ff; color: #004085; }
+.status-entregado { background-color: #d4edda; color: #155724; }
+.status-cancelado { background-color: #f8d7da; color: #721c24; }
+
+.filters {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.status-select {
+    padding: 0.25rem;
+    border: 1px solid var(--border-color);
+    border-radius: 3px;
+    font-size: 0.875rem;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Filtro por estado
+    const filterEstado = document.getElementById('filterEstado');
+    filterEstado.addEventListener('change', function() {
+        const estado = this.value;
+        const rows = document.querySelectorAll('.gestion-table tbody tr');
+        
+        rows.forEach(row => {
+            if (!estado || row.getAttribute('data-estado') === estado) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    });
+
+    // Cambiar estado del pedido
+    const statusSelects = document.querySelectorAll('.status-select');
+    statusSelects.forEach(select => {
+        select.addEventListener('change', function() {
+            const pedidoId = this.getAttribute('data-pedido');
+            const nuevoEstado = this.value;
+            
+            // Aquí iría la llamada AJAX para actualizar el estado
+            console.log(`Actualizando pedido ${pedidoId} a estado: ${nuevoEstado}`);
+            
+            // Actualizar badge visualmente
+            const row = this.closest('tr');
+            const badge = row.querySelector('.status-badge');
+            badge.textContent = this.options[this.selectedIndex].text;
+            badge.className = `status-badge status-${nuevoEstado}`;
+        });
+    });
+});
+</script>
+{% endblock %}

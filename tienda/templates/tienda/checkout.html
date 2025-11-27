@@ -1,0 +1,411 @@
+{% extends 'tienda/base.html' %}
+
+{% block title %}Checkout - Finalizar Compra{% endblock %}
+
+{% block content %}
+<div class="checkout-container">
+    <h1>Finalizar Compra</h1>
+    
+    <div class="checkout-content">
+        <div class="checkout-steps">
+            <div class="step active">1. Información de Envío</div>
+            <div class="step">2. Método de Pago</div>
+            <div class="step">3. Confirmación</div>
+        </div>
+
+        <form method="post" class="checkout-form">
+            {% csrf_token %}
+            
+            <div class="checkout-sections">
+                <!-- Información de Envío -->
+                <section class="checkout-section">
+                    <h3>Información de Envío</h3>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="nombre">Nombre *</label>
+                            <input type="text" id="nombre" name="nombre" value="{{ user.first_name }}" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="apellido">Apellido *</label>
+                            <input type="text" id="apellido" name="apellido" value="{{ user.last_name }}" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="direccion_envio">Dirección Completa *</label>
+                        <textarea id="direccion_envio" name="direccion_envio" required rows="3">
+{{ user.calle }} {{ user.numero_casa }}, {{ user.colonia }}, {{ user.ciudad }}, C.P. {{ user.codigo_postal }}
+{% if user.descripcion_direccion %}
+Referencias: {{ user.descripcion_direccion }}
+{% endif %}
+                        </textarea>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="telefono">Teléfono *</label>
+                            <input type="tel" id="telefono" name="telefono" value="{{ user.telefono }}" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="email">Email *</label>
+                            <input type="email" id="email" name="email" value="{{ user.email }}" required>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Método de Pago -->
+                <section class="checkout-section">
+                    <h3>Método de Pago</h3>
+                    
+                    <div class="payment-methods">
+                        <div class="payment-method">
+                            <input type="radio" id="tarjeta" name="metodo_pago" value="tarjeta" checked>
+                            <label for="tarjeta">
+                                <i class="fas fa-credit-card"></i>
+                                Tarjeta de Crédito/Débito
+                            </label>
+                            
+                            <div class="payment-details" id="tarjeta-details">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="numero_tarjeta">Número de Tarjeta *</label>
+                                        <input type="text" id="numero_tarjeta" name="numero_tarjeta" placeholder="1234 5678 9012 3456">
+                                    </div>
+                                </div>
+                                
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="nombre_tarjeta">Nombre en la Tarjeta *</label>
+                                        <input type="text" id="nombre_tarjeta" name="nombre_tarjeta" placeholder="{{ user.get_full_name }}">
+                                    </div>
+                                </div>
+                                
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="fecha_vencimiento">Fecha de Vencimiento *</label>
+                                        <input type="text" id="fecha_vencimiento" name="fecha_vencimiento" placeholder="MM/AA">
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="cvv">CVV *</label>
+                                        <input type="text" id="cvv" name="cvv" placeholder="123">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="payment-method">
+                            <input type="radio" id="paypal" name="metodo_pago" value="paypal">
+                            <label for="paypal">
+                                <i class="fab fa-paypal"></i>
+                                PayPal
+                            </label>
+                        </div>
+                        
+                        <div class="payment-method">
+                            <input type="radio" id="transferencia" name="metodo_pago" value="transferencia">
+                            <label for="transferencia">
+                                <i class="fas fa-university"></i>
+                                Transferencia Bancaria
+                            </label>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Resumen del Pedido -->
+                <section class="checkout-section">
+                    <h3>Resumen del Pedido</h3>
+                    
+                    <div class="order-summary">
+                        {% for item in carrito_items %}
+                        <div class="order-item">
+                            <div class="item-info">
+                                <span class="item-name">{{ item.producto.nombre }}</span>
+                                <span class="item-quantity">x{{ item.cantidad }}</span>
+                            </div>
+                            <span class="item-price">${{ item.subtotal }}</span>
+                        </div>
+                        {% endfor %}
+                        
+                        <div class="order-totals">
+                            <div class="total-line">
+                                <span>Subtotal:</span>
+                                <span>${{ total }}</span>
+                            </div>
+                            <div class="total-line">
+                                <span>Envío:</span>
+                                <span>$0.00</span>
+                            </div>
+                            <div class="total-line">
+                                <span>Impuestos:</span>
+                                <span>${{ total|floatformat:2|add:"0"|floatformat:2 }}</span>
+                            </div>
+                            <div class="total-line grand-total">
+                                <strong>Total:</strong>
+                                <strong>${{ total|floatformat:2|add:"0"|floatformat:2 }}</strong>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <div class="checkout-actions">
+                <a href="{% url 'ver_carrito' %}" class="btn btn-outline">Volver al Carrito</a>
+                <button type="submit" class="btn btn-primary btn-large">
+                    Confirmar Pedido
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+.checkout-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.checkout-steps {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 3rem;
+    position: relative;
+}
+
+.checkout-steps::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--border-color);
+    z-index: 1;
+}
+
+.step {
+    background: white;
+    padding: 1rem 2rem;
+    border: 2px solid var(--border-color);
+    border-radius: 25px;
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    flex: 1;
+    margin: 0 0.5rem;
+}
+
+.step.active {
+    border-color: var(--primary-color);
+    background: var(--primary-color);
+    color: white;
+}
+
+.checkout-sections {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.checkout-section {
+    background: white;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.checkout-section h3 {
+    color: var(--primary-color);
+    margin-bottom: 1.5rem;
+    border-bottom: 2px solid var(--secondary-color);
+    padding-bottom: 0.5rem;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.payment-methods {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.payment-method {
+    border: 2px solid var(--border-color);
+    border-radius: 10px;
+    padding: 1rem;
+    cursor: pointer;
+}
+
+.payment-method input[type="radio"] {
+    display: none;
+}
+
+.payment-method input[type="radio"]:checked + label {
+    color: var(--primary-color);
+    font-weight: bold;
+}
+
+.payment-method input[type="radio"]:checked ~ .payment-details {
+    display: block;
+}
+
+.payment-method label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    font-size: 1.1rem;
+}
+
+.payment-details {
+    display: none;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.order-summary {
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 1.5rem;
+}
+
+.order-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.order-item:last-child {
+    border-bottom: none;
+}
+
+.item-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.item-name {
+    font-weight: bold;
+}
+
+.item-quantity {
+    color: #666;
+    font-size: 0.875rem;
+}
+
+.order-totals {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 2px solid var(--border-color);
+}
+
+.total-line {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+}
+
+.grand-total {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: var(--primary-color);
+    border-top: 2px solid var(--primary-color);
+    padding-top: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.checkout-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border-color);
+}
+
+@media (max-width: 768px) {
+    .checkout-steps {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .checkout-steps::before {
+        display: none;
+    }
+    
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+    
+    .checkout-actions {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .checkout-actions .btn {
+        width: 100%;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Mostrar/ocultar detalles del método de pago
+    const paymentMethods = document.querySelectorAll('input[name="metodo_pago"]');
+    paymentMethods.forEach(method => {
+        method.addEventListener('change', function() {
+            document.querySelectorAll('.payment-details').forEach(details => {
+                details.style.display = 'none';
+            });
+            
+            const detailsId = this.id + '-details';
+            const detailsElement = document.getElementById(detailsId);
+            if (detailsElement) {
+                detailsElement.style.display = 'block';
+            }
+        });
+    });
+    
+    // Formatear número de tarjeta
+    const numeroTarjeta = document.getElementById('numero_tarjeta');
+    if (numeroTarjeta) {
+        numeroTarjeta.addEventListener('input', function() {
+            let value = this.value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
+            let formattedValue = '';
+            
+            for (let i = 0; i < value.length; i++) {
+                if (i > 0 && i % 4 === 0) {
+                    formattedValue += ' ';
+                }
+                formattedValue += value[i];
+            }
+            
+            this.value = formattedValue;
+        });
+    }
+    
+    // Formatear fecha de vencimiento
+    const fechaVencimiento = document.getElementById('fecha_vencimiento');
+    if (fechaVencimiento) {
+        fechaVencimiento.addEventListener('input', function() {
+            let value = this.value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
+            if (value.length >= 2) {
+                value = value.substring(0, 2) + '/' + value.substring(2, 4);
+            }
+            this.value = value;
+        });
+    }
+});
+</script>
+{% endblock %}

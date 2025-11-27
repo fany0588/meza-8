@@ -1,0 +1,35 @@
+{% extends 'tienda/base.html' %}
+{% load static %}
+
+{% block title %}Bienvenido{% endblock %}
+
+{% block content %}
+<div class="index-container">
+    <div class="hero-section">
+        <div class="hero-content">
+            <h1>Bienvenido a FashionStyle</h1>
+            <p>Tu tienda de moda online</p>
+            
+            <div class="user-options">
+                <div class="option-card">
+                    <h3>Administrador</h3>
+                    <p>Acceso al panel de control</p>
+                    <a href="{% url 'login' %}?tipo=admin" class="btn btn-primary">Ingresar</a>
+                </div>
+                
+                <div class="option-card">
+                    <h3>Cliente</h3>
+                    <p>Comprar en nuestra tienda</p>
+                    <a href="{% url 'login' %}?tipo=cliente" class="btn btn-primary">Ingresar</a>
+                </div>
+                
+                <div class="option-card">
+                    <h3>Invitado</h3>
+                    <p>Explorar productos</p>
+                    <a href="{% url 'todos_productos' %}" class="btn btn-outline">Continuar</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,51 @@
+{% extends 'tienda/base.html' %}
+{% load static %}
+
+{% block title %}Inicio - FashionStyle{% endblock %}
+
+{% block content %}
+<div class="tienda-home">
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Descubre tu estilo único</h1>
+            <p>Las últimas tendencias en moda para toda la familia</p>
+            <a href="{% url 'todos_productos' %}" class="btn btn-primary">Comprar Ahora</a>
+        </div>
+    </section>
+
+    <!-- Productos Destacados -->
+    <section class="featured-products">
+        <h2>Productos Destacados</h2>
+        <div class="products-grid">
+            {% for producto in productos_destacados %}
+            <div class="product-card">
+                {% if producto.imagen %}
+                <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}">
+                {% endif %}
+                <h3>{{ producto.nombre }}</h3>
+                <p class="price">${{ producto.precio }}</p>
+                <a href="{% url 'producto_detalle' producto.id %}" class="btn btn-outline">Ver Detalles</a>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- Nuevos Productos -->
+    <section class="new-products">
+        <h2>Nuevos Productos</h2>
+        <div class="products-grid">
+            {% for producto in productos_nuevos %}
+            <div class="product-card">
+                {% if producto.imagen %}
+                <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}">
+                {% endif %}
+                <h3>{{ producto.nombre }}</h3>
+                <p class="price">${{ producto.precio }}</p>
+                <a href="{% url 'producto_detalle' producto.id %}" class="btn btn-outline">Ver Detalles</a>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+</div>
+{% endblock %}

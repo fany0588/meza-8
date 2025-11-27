@@ -1,0 +1,68 @@
+{% extends 'tienda/base.html' %}
+
+{% block title %}Gestión de Clientes{% endblock %}
+
+{% block content %}
+<div class="gestion-container">
+    <div class="gestion-header">
+        <h1>Gestión de Clientes</h1>
+        <div class="search-box">
+            <input type="text" id="searchClientes" placeholder="Buscar clientes..." class="filter-input">
+        </div>
+    </div>
+    
+    <table class="gestion-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Usuario</th>
+                <th>Nombre</th>
+                <th>Email</th>
+                <th>Teléfono</th>
+                <th>Fecha Registro</th>
+                <th>Ciudad</th>
+                <th>Total Pedidos</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for cliente in clientes %}
+            <tr>
+                <td>{{ cliente.id }}</td>
+                <td>{{ cliente.username }}</td>
+                <td>{{ cliente.first_name }} {{ cliente.last_name }}</td>
+                <td>{{ cliente.email }}</td>
+                <td>{{ cliente.telefono|default:"-" }}</td>
+                <td>{{ cliente.fecha_registro|date:"d/m/Y" }}</td>
+                <td>{{ cliente.ciudad|default:"-" }}</td>
+                <td>{{ cliente.pedido_set.count }}</td>
+                <td class="actions">
+                    <a href="#" class="btn btn-sm btn-outline">Ver</a>
+                    <a href="#" class="btn btn-sm btn-outline">Editar</a>
+                    <a href="#" class="btn btn-sm btn-danger">Eliminar</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="9" class="no-data">No hay clientes registrados</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchClientes');
+    searchInput.addEventListener('input', function() {
+        const filter = this.value.toLowerCase();
+        const rows = document.querySelectorAll('.gestion-table tbody tr');
+        
+        rows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            row.style.display = text.includes(filter) ? '' : 'none';
+        });
+    });
+});
+</script>
+{% endblock %}

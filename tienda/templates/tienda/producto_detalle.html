@@ -1,0 +1,321 @@
+{% extends 'tienda/base.html' %}
+{% load static %}
+
+{% block title %}{{ producto.nombre }}{% endblock %}
+
+{% block content %}
+<div class="producto-detalle-container">
+    <div class="breadcrumb">
+        <a href="{% url 'tienda_home' %}">Inicio</a> > 
+        <a href="{% url 'productos_categoria' producto.categoria.id %}">{{ producto.categoria.nombre }}</a> > 
+        <span>{{ producto.nombre }}</span>
+    </div>
+
+    <div class="producto-main">
+        <div class="producto-imagen">
+            {% if producto.imagen %}
+            <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" id="mainImage">
+            {% else %}
+            <img src="{% static 'img/placeholder-product.jpg' %}" alt="Imagen no disponible">
+            {% endif %}
+        </div>
+
+        <div class="producto-info">
+            <h1>{{ producto.nombre }}</h1>
+            <p class="producto-precio">${{ producto.precio }}</p>
+            
+            <div class="producto-meta">
+                <div class="meta-item">
+                    <strong>Categoría:</strong> {{ producto.categoria.nombre }}
+                </div>
+                <div class="meta-item">
+                    <strong>Tipo:</strong> {{ producto.get_tipo_display }}
+                </div>
+                <div class="meta-item">
+                    <strong>Temporada:</strong> {{ producto.get_temporada_display }}
+                </div>
+                <div class="meta-item">
+                    <strong>Material:</strong> {{ producto.material }}
+                </div>
+                <div class="meta-item">
+                    <strong>Color:</strong> {{ producto.color }}
+                </div>
+                <div class="meta-item">
+                    <strong>Talla:</strong> {{ producto.get_talla_display }}
+                </div>
+            </div>
+
+            <div class="stock-info">
+                {% if producto.stock > 0 %}
+                <span class="in-stock">✓ En stock ({{ producto.stock }} disponibles)</span>
+                {% else %}
+                <span class="out-of-stock">✗ Agotado</span>
+                {% endif %}
+            </div>
+
+            {% if user.is_authenticated and user.tipo_usuario == 'cliente' %}
+            <div class="producto-actions">
+                <form method="post" action="{% url 'agregar_carrito' producto.id %}" class="add-to-cart-form">
+                    {% csrf_token %}
+                    <div class="quantity-selector">
+                        <label for="quantity">Cantidad:</label>
+                        <input type="number" id="quantity" name="quantity" value="1" min="1" max="{{ producto.stock }}">
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-large" {% if producto.stock == 0 %}disabled{% endif %}>
+                        <i class="fas fa-shopping-cart"></i>
+                        Agregar al Carrito
+                    </button>
+                </form>
+
+                <form method="post" action="{% url 'agregar_favorito' producto.id %}" class="favorite-form">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-outline">
+                        <i class="far fa-heart"></i>
+                        Agregar a Favoritos
+                    </button>
+                </form>
+            </div>
+            {% endif %}
+
+            <div class="producto-descripcion">
+                <h3>Descripción</h3>
+                <p>{{ producto.descripcion }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reseñas del producto -->
+    <section class="producto-resenas">
+        <div class="resenas-header">
+            <h2>Reseñas del Producto</h2>
+            {% if user.is_authenticated and user.tipo_usuario == 'cliente' %}
+            <a href="{% url 'crear_resena' producto.id %}" class="btn btn-primary">Escribir Reseña</a>
+            {% endif %}
+        </div>
+
+        <div class="resenas-list">
+            {% for resena in resenas %}
+            <div class="resena-item">
+                <div class="resena-header">
+                    <div class="resena-user">
+                        <strong>{{ resena.cliente.get_full_name }}</strong>
+                        <div class="star-rating">
+                            {% for i in "12345" %}
+                                {% if forloop.counter <= resena.calificacion %}
+                                    <span class="star filled">★</span>
+                                {% else %}
+                                    <span class="star">★</span>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <span class="resena-fecha">{{ resena.fecha|date:"d/m/Y" }}</span>
+                </div>
+                <p class="resena-comentario">{{ resena.comentario }}</p>
+                {% if resena.foto_producto %}
+                <div class="resena-foto">
+                    <img src="{{ resena.foto_producto.url }}" alt="Foto de la reseña">
+                </div>
+                {% endif %}
+                
+                {% if user == resena.cliente %}
+                <div class="resena-actions">
+                    <a href="{% url 'editar_resena' resena.id %}" class="btn-text">Editar</a>
+                    <a href="{% url 'eliminar_resena' resena.id %}" class="btn-text text-danger">Eliminar</a>
+                </div>
+                {% endif %}
+            </div>
+            {% empty %}
+            <div class="no-resenas">
+                <p>Este producto aún no tiene reseñas. ¡Sé el primero en opinar!</p>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- Productos relacionados -->
+    {% if productos_relacionados %}
+    <section class="productos-relacionados">
+        <h2>Productos Relacionados</h2>
+        <div class="products-grid">
+            {% for producto_rel in productos_relacionados %}
+            <div class="product-card">
+                {% if producto_rel.imagen %}
+                <img src="{{ producto_rel.imagen.url }}" alt="{{ producto_rel.nombre }}">
+                {% endif %}
+                <h3>{{ producto_rel.nombre }}</h3>
+                <p class="price">${{ producto_rel.precio }}</p>
+                <a href="{% url 'producto_detalle' producto_rel.id %}" class="btn btn-outline">Ver Detalles</a>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+</div>
+
+<style>
+.producto-detalle-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.breadcrumb {
+    margin-bottom: 2rem;
+    color: #666;
+}
+
+.breadcrumb a {
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+.producto-main {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    margin-bottom: 3rem;
+}
+
+.producto-imagen img {
+    width: 100%;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.producto-precio {
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--primary-color);
+    margin: 1rem 0;
+}
+
+.producto-meta {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 10px;
+    margin: 1.5rem 0;
+}
+
+.meta-item {
+    margin-bottom: 0.5rem;
+}
+
+.stock-info {
+    margin: 1rem 0;
+    font-weight: bold;
+}
+
+.in-stock {
+    color: var(--success-color);
+}
+
+.out-of-stock {
+    color: var(--error-color);
+}
+
+.producto-actions {
+    margin: 2rem 0;
+}
+
+.add-to-cart-form,
+.favorite-form {
+    margin-bottom: 1rem;
+}
+
+.quantity-selector {
+    margin-bottom: 1rem;
+}
+
+.quantity-selector label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+}
+
+.quantity-selector input {
+    width: 100px;
+    padding: 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+}
+
+.btn-large {
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+}
+
+.producto-resenas,
+.productos-relacionados {
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.resenas-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.resena-item {
+    background: white;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.resena-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.resena-user {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.resena-fecha {
+    color: #666;
+    font-size: 0.875rem;
+}
+
+.resena-comentario {
+    line-height: 1.6;
+    margin-bottom: 1rem;
+}
+
+.resena-foto img {
+    max-width: 200px;
+    border-radius: 5px;
+}
+
+.resena-actions {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.text-danger {
+    color: var(--error-color);
+}
+
+@media (max-width: 768px) {
+    .producto-main {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+    
+    .resenas-header {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: flex-start;
+    }
+}
+</style>
+{% endblock %}

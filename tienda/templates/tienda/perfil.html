@@ -1,0 +1,170 @@
+{% extends "tienda/base.html" %}
+
+{% block title %}Mi Perfil - FashionStyle{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Mi Perfil</h1>
+    
+    <div style="display: grid; grid-template-columns: 300px 1fr; gap: 30px; margin-top: 20px;">
+        <!-- Sidebar -->
+        <div style="background: white; padding: 20px; border-radius: 10px; height: fit-content;">
+            <div style="text-align: center; margin-bottom: 20px;">
+                <div style="font-size: 3rem; color: #e91e63;">👤</div>
+                <h3 style="margin: 10px 0 5px 0;">{{ user.get_full_name }}</h3>
+                <p style="color: #666; margin: 0; font-size: 0.9rem;">
+                    Miembro desde: {{ user.fecha_registro|date:"F Y" }}
+                </p>
+            </div>
+            
+            <div style="border-top: 1px solid #eee; padding-top: 15px;">
+                <h4 style="margin-bottom: 10px;">Información de Contacto</h4>
+                <p style="margin: 5px 0; font-size: 0.9rem;">
+                    <strong>Email:</strong><br>{{ user.email }}
+                </p>
+                <p style="margin: 5px 0; font-size: 0.9rem;">
+                    <strong>Teléfono:</strong><br>{{ user.telefono|default:"No proporcionado" }}
+                </p>
+            </div>
+        </div>
+
+        <!-- Formulario de perfil -->
+        <div style="background: white; padding: 30px; border-radius: 10px;">
+            <form method="post">
+                {% csrf_token %}
+                
+                <h3 style="color: #e91e63; margin-bottom: 20px; border-bottom: 2px solid #f8bbd9; padding-bottom: 10px;">
+                    Información Personal
+                </h3>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                    <div>
+                        <label style="display: block; margin-bottom: 5px; font-weight: bold;">Nombre *</label>
+                        {{ form.first_name }}
+                        {% if form.first_name.errors %}
+                        <div style="color: #dc3545; font-size: 0.8rem; margin-top: 5px;">
+                            {{ form.first_name.errors }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div>
+                        <label style="display: block; margin-bottom: 5px; font-weight: bold;">Apellido *</label>
+                        {{ form.last_name }}
+                        {% if form.last_name.errors %}
+                        <div style="color: #dc3545; font-size: 0.8rem; margin-top: 5px;">
+                            {{ form.last_name.errors }}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                    <div>
+                        <label style="display: block; margin-bottom: 5px; font-weight: bold;">Email *</label>
+                        {{ form.email }}
+                        {% if form.email.errors %}
+                        <div style="color: #dc3545; font-size: 0.8rem; margin-top: 5px;">
+                            {{ form.email.errors }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div>
+                        <label style="display: block; margin-bottom: 5px; font-weight: bold;">Teléfono *</label>
+                        {{ form.telefono }}
+                        {% if form.telefono.errors %}
+                        <div style="color: #dc3545; font-size: 0.8rem; margin-top: 5px;">
+                            {{ form.telefono.errors }}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <h3 style="color: #e91e63; margin: 30px 0 20px 0; border-bottom: 2px solid #f8bbd9; padding-bottom: 10px;">
+                    Dirección de Envío
+                </h3>
+
+                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 15px; margin-bottom: 15px;">
+                    <div>
+                        <label style="display: block; margin-bottom: 5px; font-weight: bold;">Calle *</label>
+                        {{ form.calle }}
+                    </div>
+                    
+                    <div>
+                        <label style="display: block; margin-bottom: 5px; font-weight: bold;">Número *</label>
+                        {{ form.numero_casa }}
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                    <div>
+                        <label style="display: block; margin-bottom: 5px; font-weight: bold;">Colonia *</label>
+                        {{ form.colonia }}
+                    </div>
+                    
+                    <div>
+                        <label style="display: block; margin-bottom: 5px; font-weight: bold;">Ciudad *</label>
+                        {{ form.ciudad }}
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                    <div>
+                        <label style="display: block; margin-bottom: 5px; font-weight: bold;">Código Postal *</label>
+                        {{ form.codigo_postal }}
+                    </div>
+                    
+                    <div>
+                        <label style="display: block; margin-bottom: 5px; font-weight: bold;">Método de Pago</label>
+                        {{ form.metodo_pago }}
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">Referencias Adicionales</label>
+                    {{ form.descripcion_direccion }}
+                </div>
+
+                <div style="display: flex; gap: 15px; margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
+                    <button type="submit" 
+                            style="background: #e91e63; color: white; padding: 12px 30px; border: none; border-radius: 5px; cursor: pointer; font-size: 1rem;">
+                        Guardar Cambios
+                    </button>
+                    <a href="{% url 'tienda_home' %}" 
+                       style="background: #6c757d; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; font-size: 1rem;">
+                        Cancelar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Estilos para los campos del formulario */
+input, select, textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 1rem;
+    box-sizing: border-box;
+}
+
+input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: #e91e63;
+    box-shadow: 0 0 0 2px rgba(233, 30, 99, 0.1);
+}
+
+textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+label {
+    color: #333;
+}
+</style>
+{% endblock %}
